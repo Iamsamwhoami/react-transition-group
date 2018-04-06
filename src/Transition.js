@@ -1,6 +1,5 @@
 import * as PropTypes from 'prop-types';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { timeoutsShape } from './utils/PropTypes';
 
@@ -204,7 +203,7 @@ class Transition extends React.Component {
       this.nextStatus = null;
       // nextStatus will always be ENTERING or EXITING.
       this.cancelNextCallback();
-      const node = ReactDOM.findDOMNode(this);
+      const node = this.child;
 
       if (nextStatus === ENTERING) {
         this.performEnter(node, mounting);
@@ -354,11 +353,17 @@ class Transition extends React.Component {
     delete childProps.onExited;
 
     if (typeof children === 'function') {
-      return children(status, childProps)
+      return React.cloneElement(children(status, childProps), {
+        ...childProps,
+        ref: child => (this.child = child),
+      });
     }
 
     const child = React.Children.only(children);
-    return React.cloneElement(child, childProps);
+    return React.cloneElement(child, {
+      ...childProps,
+      ref: child => (this.child = child),
+    });
   }
 }
 
